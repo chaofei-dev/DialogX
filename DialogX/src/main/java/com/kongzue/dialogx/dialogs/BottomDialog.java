@@ -775,6 +775,14 @@ public class BottomDialog extends BaseDialog implements DialogXBaseBottomDialog 
         public BottomDialogTouchEventInterceptor getBottomDialogTouchEventInterceptor() {
             return bottomDialogTouchEventInterceptor;
         }
+
+        /**
+         * 是否跟随导航栏高度变化
+         * @param isFollow 默认跟随
+         */
+        public void isFollowNavigationBarHeight(Boolean isFollow) {
+            boxRoot.isFollowNavigationBarHeight(isFollow);
+        }
     }
 
     public void refreshUI() {

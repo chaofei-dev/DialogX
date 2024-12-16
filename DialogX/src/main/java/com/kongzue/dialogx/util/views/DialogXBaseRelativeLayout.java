@@ -54,6 +54,7 @@ public class DialogXBaseRelativeLayout extends RelativeLayout {
     public FitSystemBarUtils getFitSystemBarUtils() {
         return fitSystemBarUtils;
     }
+    private boolean isFollowNavigationBarHeight = true;
 
     public DialogXBaseRelativeLayout(Context context) {
         super(context);
@@ -106,6 +107,7 @@ public class DialogXBaseRelativeLayout extends RelativeLayout {
 
                 @Override
                 public void unsafeRect(int start, int top, int end, int bottom) {
+                    if (!isFollowNavigationBarHeight) return;
                     log("KONGZUE DEBUG DIALOGX: unsafeRect t=" + top + " b=" + bottom);
                     if (unsafePlace == null) {
                         unsafePlace = new Rect();
@@ -444,5 +446,13 @@ public class DialogXBaseRelativeLayout extends RelativeLayout {
         if (debugMode && DialogX.DEBUGMODE) {
             Log.e(">>>", s);
         }
+    }
+
+    /**
+     * 底部高度是否跟随导航栏高度变化
+     * @param isFollow 默认跟随
+     */
+    public void isFollowNavigationBarHeight(Boolean isFollow) {
+        this.isFollowNavigationBarHeight = isFollow;
     }
 }

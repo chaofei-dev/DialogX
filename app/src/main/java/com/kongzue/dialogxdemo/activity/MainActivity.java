@@ -663,10 +663,11 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 String s = rdoMaterial.isChecked() ? "你可以向下滑动来关闭这个对话框" : "你可以点击空白区域或返回键来关闭这个对话框";
-                new BottomDialog("标题", "这里是对话框内容。\n" + s + "。\n底部对话框也支持自定义布局扩展使用方式。",
+                BottomDialog dialog = new BottomDialog("标题", "这里是对话框内容。\n" + s + "。\n底部对话框也支持自定义布局扩展使用方式。",
                         new OnBindView<BottomDialog>(R.layout.layout_custom_view) {
                             @Override
                             public void onBind(BottomDialog dialog, View v) {
+                                dialog.getDialogImpl().isFollowNavigationBarHeight(true);
                                 if (dialog.getDialogImpl().imgTab != null) {
                                     ((ViewGroup) dialog.getDialogImpl().imgTab.getParent()).removeView(dialog.getDialogImpl().imgTab);
                                 }
@@ -691,8 +692,8 @@ public class MainActivity extends BaseActivity {
                                 log("#onSlideTouchEvent: action=" + event.getAction() + " y=" + event.getY());
                                 return super.onSlideTouchEvent(dialog, v, event);
                             }
-                        })
-                        .show();
+                        });
+                dialog.show();
             }
         });
 
