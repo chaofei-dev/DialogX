@@ -54,6 +54,10 @@ public class DialogXBaseRelativeLayout extends RelativeLayout {
     public FitSystemBarUtils getFitSystemBarUtils() {
         return fitSystemBarUtils;
     }
+
+    /**
+     * 底部高度是否跟随导航栏高度变化
+     */
     private boolean isFollowNavigationBarHeight = true;
 
     public DialogXBaseRelativeLayout(Context context) {
@@ -107,7 +111,6 @@ public class DialogXBaseRelativeLayout extends RelativeLayout {
 
                 @Override
                 public void unsafeRect(int start, int top, int end, int bottom) {
-                    if (!isFollowNavigationBarHeight) return;
                     log("KONGZUE DEBUG DIALOGX: unsafeRect t=" + top + " b=" + bottom);
                     if (unsafePlace == null) {
                         unsafePlace = new Rect();
@@ -118,7 +121,7 @@ public class DialogXBaseRelativeLayout extends RelativeLayout {
                         WindowInsetsCompat windowInsetsCompat = WindowInsetsCompat.toWindowInsetsCompat(getRootWindowInsets());
                         boolean navigationBarsVisible = windowInsetsCompat.isVisible(WindowInsetsCompat.Type.navigationBars());
                         boolean imeVisible = windowInsetsCompat.isVisible(WindowInsetsCompat.Type.ime());
-                        if (!imeVisible && navigationBarsVisible) {
+                        if (!imeVisible && navigationBarsVisible && isFollowNavigationBarHeight) {
                             systemBarInsets = windowInsetsCompat.getInsets(WindowInsetsCompat.Type.systemBars());
                             if (systemBarInsets.bottom == bottom &&
                                     systemBarInsets.top == top &&
