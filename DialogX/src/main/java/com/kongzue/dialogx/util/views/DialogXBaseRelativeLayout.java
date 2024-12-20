@@ -121,7 +121,11 @@ public class DialogXBaseRelativeLayout extends RelativeLayout {
                         WindowInsetsCompat windowInsetsCompat = WindowInsetsCompat.toWindowInsetsCompat(getRootWindowInsets());
                         boolean navigationBarsVisible = windowInsetsCompat.isVisible(WindowInsetsCompat.Type.navigationBars());
                         boolean imeVisible = windowInsetsCompat.isVisible(WindowInsetsCompat.Type.ime());
-                        if (!imeVisible && navigationBarsVisible && isFollowNavigationBarHeight) {
+                        // 输入法不可见&底部高度不跟随导航栏高度变化 直接返回 不调整viewPadding值
+                        if (!imeVisible && isFollowNavigationBarHeight) {
+                            return;
+                        }
+                        if (!imeVisible && navigationBarsVisible) {
                             systemBarInsets = windowInsetsCompat.getInsets(WindowInsetsCompat.Type.systemBars());
                             if (systemBarInsets.bottom == bottom &&
                                     systemBarInsets.top == top &&
