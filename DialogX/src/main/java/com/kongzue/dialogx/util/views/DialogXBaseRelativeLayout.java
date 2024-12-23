@@ -123,6 +123,7 @@ public class DialogXBaseRelativeLayout extends RelativeLayout {
                         boolean imeVisible = windowInsetsCompat.isVisible(WindowInsetsCompat.Type.ime());
                         // 输入法不可见&底部高度不跟随导航栏高度变化 直接返回 不调整viewPadding值
                         if (!imeVisible && !isFollowNavigationBarHeight) {
+                            setUnsafePadding(0, 0, 0, 0);
                             return;
                         }
                         if (!imeVisible && navigationBarsVisible) {
