@@ -665,6 +665,15 @@ public abstract class BaseDialog implements LifecycleOwner {
     protected boolean dismissAnimFlag;
     protected boolean preShow;
 
+    /**
+     * 是否已进入退场流程：dismiss 后立即为 true（退场动画期间 isShow() 仍为 true），再次 show 时复位
+     *
+     * @return true 表示正在或已经关闭
+     */
+    public boolean isDismissing() {
+        return dismissAnimFlag;
+    }
+
     protected void beforeShow() {
         preShow = true;
         dismissAnimFlag = false;
