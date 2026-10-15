@@ -644,6 +644,7 @@ public class PopMenu extends BaseDialog {
 
             if (!dismissAnimFlag && boxRoot != null) {
                 dismissAnimFlag = true;
+                boxRoot.refreshBackPressedCallback();
                 boxRoot.post(new Runnable() {
                     @Override
                     public void run() {

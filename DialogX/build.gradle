@@ -29,6 +29,8 @@ artifacts {
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.3.0+'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4+'
+    // 固定 1.5.1：ViewTreeOnBackPressedDispatcherOwner / ComponentDialog 自 1.5 起提供，1.6+ 要求 compileSdk 33
+    implementation 'androidx.activity:activity:1.5.1'
     compileOnly files('libs\\androidx-rs.jar')
     api files('libs\\DialogXInterface.jar')
 }

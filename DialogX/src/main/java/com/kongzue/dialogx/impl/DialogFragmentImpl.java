@@ -5,6 +5,7 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static com.kongzue.dialogx.DialogX.error;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
@@ -17,6 +18,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 
+import androidx.activity.ComponentDialog;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
@@ -47,6 +49,16 @@ public class DialogFragmentImpl extends DialogFragment {
         this.dialogView = dialogView;
         this.baseDialog = baseDialog;
         activityWeakReference = new WeakReference<>(baseDialog.getOwnActivity());
+    }
+
+    /**
+     * 返回 ComponentDialog，保证在 fragment 低于 1.5 的宿主中弹窗窗口也有 OnBackPressedDispatcher，
+     * 弹窗根布局可向其注册返回回调（fragment 1.5 起默认即为 ComponentDialog）。
+     */
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        return new ComponentDialog(requireContext(), getTheme());
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.kongzue.dialogx.util.views;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -16,6 +17,11 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.RelativeLayout;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.activity.OnBackPressedDispatcher;
+import androidx.activity.OnBackPressedDispatcherOwner;
+import androidx.activity.ViewTreeOnBackPressedDispatcherOwner;
+import androidx.annotation.NonNull;
 import androidx.annotation.Px;
 import androidx.core.graphics.Insets;
 import androidx.core.view.WindowInsetsCompat;
@@ -235,6 +241,7 @@ public class DialogXBaseRelativeLayout extends RelativeLayout {
         super.onAttachedToWindow();
         if (!isInEditMode()) {
             if (getParentDialog() == null || getParentDialog().getOwnActivity() == null) return;
+            registerBackPressedCallback();
             if (onLifecycleCallBack != null) {
                 onLifecycleCallBack.onShow();
             }
@@ -247,11 +254,91 @@ public class DialogXBaseRelativeLayout extends RelativeLayout {
 
     @Override
     protected void onDetachedFromWindow() {
+        unregisterBackPressedCallback();
         if (onLifecycleCallBack != null) {
             onLifecycleCallBack.onDismiss();
         }
         onSafeInsetsChangeListener = null;
         super.onDetachedFromWindow();
+    }
+
+    @Override
+    protected void onVisibilityChanged(@NonNull View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+        refreshBackPressedCallback();
+    }
+
+    private OnBackPressedCallback onBackPressedCallback;
+    private OnBackPressedDispatcher onBackPressedDispatcher;
+
+    /**
+     * 向所在窗口的 OnBackPressedDispatcher 注册返回回调（Android 13+ 预测性返回不再派发 KEYCODE_BACK）。
+     * 必须绑定 lifecycle：页面用 addCallback(this) 注册的回调会在 ON_START 时重新排到队尾，
+     * 弹窗回调若不绑定，切后台或跳转返回后会被页面回调抢先。
+     */
+    private void registerBackPressedCallback() {
+        unregisterBackPressedCallback();
+        // 提示类弹窗不拦截返回，交给下层处理
+        if (getParentDialog() instanceof NoTouchInterface) return;
+        OnBackPressedDispatcherOwner owner = findBackPressedDispatcherOwner();
+        if (owner == null) return;
+        onBackPressedDispatcher = owner.getOnBackPressedDispatcher();
+        onBackPressedCallback = new OnBackPressedCallback(false) {
+            @Override
+            public void handleOnBackPressed() {
+                boolean consumed = onBackPressedListener != null && onBackPressedListener.onBackPressed();
+                if (!consumed) {
+                    // 自定义监听未消费：临时关闭本回调，把这次返回交给下层回调
+                    setEnabled(false);
+                    if (onBackPressedDispatcher != null) {
+                        onBackPressedDispatcher.onBackPressed();
+                    }
+                    refreshBackPressedCallback();
+                }
+            }
+        };
+        onBackPressedDispatcher.addCallback(owner, onBackPressedCallback);
+        refreshBackPressedCallback();
+    }
+
+    /**
+     * 查找所在窗口的 dispatcher owner：VIEW 模式为 Activity，DIALOG_FRAGMENT 模式为 ComponentDialog。
+     * VIEW 模式下 Activity 未调用 setContentView 时 View 树上没有 owner，退回到所属 Activity。
+     */
+    private OnBackPressedDispatcherOwner findBackPressedDispatcherOwner() {
+        OnBackPressedDispatcherOwner owner = ViewTreeOnBackPressedDispatcherOwner.get(this);
+        if (owner != null) return owner;
+        BaseDialog dialog = getParentDialog();
+        if (dialog == null || dialog.getDialogImplMode() != DialogX.IMPL_MODE.VIEW) return null;
+        Activity activity = dialog.getOwnActivity();
+        return activity instanceof OnBackPressedDispatcherOwner ? (OnBackPressedDispatcherOwner) activity : null;
+    }
+
+    private void unregisterBackPressedCallback() {
+        if (onBackPressedCallback != null) {
+            onBackPressedCallback.remove();
+            onBackPressedCallback = null;
+        }
+        onBackPressedDispatcher = null;
+    }
+
+    /**
+     * 按当前状态刷新返回回调开关。可能在构造期间被调用，此时回调尚未创建。
+     * VIEW 模式下弹窗与页面共用窗口，关闭开始即退出拦截，把返回交还页面；
+     * 其他模式弹窗独占窗口，关闭动画期间继续消费返回，避免外层 Dialog 被 cancel 截断退场动画。
+     */
+    public void refreshBackPressedCallback() {
+        if (onBackPressedCallback == null) return;
+        BaseDialog dialog = getParentDialog();
+        boolean enabled = isAttachedToWindow()
+                && interceptBack
+                && onBackPressedListener != null
+                && dialog != null
+                && isShown();
+        if (enabled && dialog.getDialogImplMode() == DialogX.IMPL_MODE.VIEW && dialog.isDismissing()) {
+            enabled = false;
+        }
+        onBackPressedCallback.setEnabled(enabled);
     }
 
     @Override
@@ -319,6 +406,7 @@ public class DialogXBaseRelativeLayout extends RelativeLayout {
 
     public DialogXBaseRelativeLayout setOnBackPressedListener(PrivateBackPressedListener onBackPressedListener) {
         this.onBackPressedListener = onBackPressedListener;
+        refreshBackPressedCallback();
         return this;
     }
 
@@ -402,6 +490,7 @@ public class DialogXBaseRelativeLayout extends RelativeLayout {
 
     public DialogXBaseRelativeLayout setInterceptBack(boolean interceptBack) {
         this.interceptBack = interceptBack;
+        refreshBackPressedCallback();
         return this;
     }
 

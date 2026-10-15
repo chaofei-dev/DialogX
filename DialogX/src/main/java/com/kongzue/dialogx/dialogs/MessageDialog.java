@@ -816,6 +816,7 @@ public class MessageDialog extends BaseDialog {
 
             if (!dismissAnimFlag && getDialogXAnimImpl() != null) {
                 dismissAnimFlag = true;
+                if (boxRoot != null) boxRoot.refreshBackPressedCallback();
                 getDialogXAnimImpl().doExitAnim(MessageDialog.this, bkg);
                 runOnMainDelay(new Runnable() {
                     @Override

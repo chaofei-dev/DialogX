@@ -433,6 +433,7 @@ public class CustomDialog extends BaseDialog {
             if (v != null) v.setEnabled(false);
             if (!dismissAnimFlag && boxCustom != null) {
                 dismissAnimFlag = true;
+                if (boxRoot != null) boxRoot.refreshBackPressedCallback();
                 boxCustom.post(new Runnable() {
                     @Override
                     public void run() {

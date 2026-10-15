@@ -513,6 +513,7 @@ public class WaitDialog extends BaseDialog {
 
             if (!dismissAnimFlag && boxRoot != null) {
                 dismissAnimFlag = true;
+                boxRoot.refreshBackPressedCallback();
                 boxRoot.post(new Runnable() {
                     @Override
                     public void run() {
