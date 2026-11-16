@@ -66,6 +66,13 @@ public class DialogXBaseRelativeLayout extends RelativeLayout {
      */
     private boolean isFollowNavigationBarHeight = true;
 
+    /**
+     * 是否自动调整 view 底部 padding。
+     * true：自动调整；false：不自动调整。
+     * 影响因素：键盘弹出、底部导航栏高度，默认 true。
+     */
+    private boolean autoAdjust = true;
+
     public DialogXBaseRelativeLayout(Context context) {
         super(context);
         init(null);
@@ -127,6 +134,11 @@ public class DialogXBaseRelativeLayout extends RelativeLayout {
                         WindowInsetsCompat windowInsetsCompat = WindowInsetsCompat.toWindowInsetsCompat(getRootWindowInsets());
                         boolean navigationBarsVisible = windowInsetsCompat.isVisible(WindowInsetsCompat.Type.navigationBars());
                         boolean imeVisible = windowInsetsCompat.isVisible(WindowInsetsCompat.Type.ime());
+                        // 不允许调整底部距离
+                        if (!autoAdjust) {
+                            setUnsafePadding(0, 0, 0, 0);
+                            return;
+                        }
                         // 输入法不可见&底部高度不跟随导航栏高度变化 直接返回 不调整viewPadding值
                         if (!imeVisible && !isFollowNavigationBarHeight) {
                             setUnsafePadding(0, 0, 0, 0);
@@ -551,5 +563,14 @@ public class DialogXBaseRelativeLayout extends RelativeLayout {
      */
     public void isFollowNavigationBarHeight(Boolean isFollow) {
         this.isFollowNavigationBarHeight = isFollow;
+    }
+
+    /**
+     * 是否自动调整 view 底部 padding
+     *
+     * @param autoAdjust true：自动调整；false：不自动调整。影响因素：键盘弹出、底部导航栏高度，默认 true
+     */
+    public void setAutoAdjust(Boolean autoAdjust) {
+        this.autoAdjust = autoAdjust;
     }
 }
